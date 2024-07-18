@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User
@@ -111,8 +111,18 @@ def sign_in():
         "error": "Error"
     })
 
-@app.route('/api/sign-out', methods=['POST'])
-def sign_out():
+@app.route('/api/profile', methods=['GET'])
+@jwt_required()
+def profile():
+
+    id = get_jwt_identity()
+    user = User.query.get(id)
+
+    if not user: 
+        return jsonify({"error": "User is invalid!"}), 401
+    
+    return jsonify(user.serialize()), 200
+    
 
 
 
